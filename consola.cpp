@@ -19,6 +19,8 @@ using namespace std;
 #define CMD_QUIT    "quit"
 #define CMD_SQUIT   "q"
 
+#define AAI_TAG 1
+
 static unsigned int np;
 
 // Crea un ConcurrentHashMap distribuido
@@ -61,6 +63,46 @@ static void member(string key) {
 static void addAndInc(string key) {
 
     // TODO: Implementar
+    //char add[] = "addAndInc ";
+    //char message[] = "addAndInc ";  	/* mensaje */
+    //char message[10 + strlen((char*)key)];
+    //strcpy(message, add);
+    //strcat(message, key);
+   
+
+    char message[10+key.size()];
+    char aux[] = "addAndInc ";
+
+    for (int i = 0; i < 10+key.size(); ++i){
+    	if(i < 10){
+    		message[i] = aux[i];
+    	} else {
+    	message[i] = key[i-10];
+    	}
+    }
+    
+    //strcat(message, key);
+    
+    unsigned int winner;
+    MPI_Status s;
+    
+    int status = MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    status = MPI_Recv(&winner, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &s);
+
+    status = MPI_Bcast(&winner, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+
+    if (status!=MPI_SUCCESS){
+        printf("Ups...\n");
+        exit(1);
+    }
+
+
+
 
     cout << "Agregado: " << key << endl;
 }
