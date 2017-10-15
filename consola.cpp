@@ -36,6 +36,12 @@ static void load(list<string> params) {
 // Esta función debe avisar a todos los nodos que deben terminar
 static void quit() {
     // TODO: Implementar
+    char* message = "quit ";
+    if (MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD) != MPI_SUCCESS){
+      printf("Ups...\n");
+      exit(1);
+    }
+    cout << "Todos los nodos han terminado." << endl;
 }
 
 // Esta función calcula el máximo con todos los nodos
@@ -51,10 +57,25 @@ static void maximum() {
 
 // Esta función busca la existencia de *key* en algún nodo
 static void member(string key) {
-    bool esta = false;
 
-    // TODO: Implementar
+  string m = "member " + key;
+  char* message = const_cast<char*>(m.c_str());
+  MPI_Status s;
 
+  bool esta = false;
+  /* Brodcast request to all nodes */
+  if (MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD) != MPI_SUCCESS){
+    printf("Ups...\n");
+    exit(1);
+  }
+  for (size_t i = 1; i < np; i++) {
+    int node_response;
+    if (MPI_Recv(&node_response, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &s) != MPI_SUCCESS){
+      printf("Ups...\n");
+      exit(1);
+    }
+    if(node_response==1) esta = true;
+  }
     cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
 }
 
@@ -62,48 +83,26 @@ static void member(string key) {
 // Esta función suma uno a *key* en algún nodo
 static void addAndInc(string key) {
 
-    // TODO: Implementar
-    //char add[] = "addAndInc ";
-    //char message[] = "addAndInc ";  	/* mensaje */
-    //char message[10 + strlen((char*)key)];
-    //strcpy(message, add);
-    //strcat(message, key);
-   
-
-    char message[10+key.size()];
-    char aux[] = "addAndInc ";
-
-    for (int i = 0; i < 10+key.size(); ++i){
-    	if(i < 10){
-    		message[i] = aux[i];
-    	} else {
-    	message[i] = key[i-10];
-    	}
-    }
-    
-    //strcat(message, key);
-    
+    string m = "addAndInc " + key;
+    char* message = const_cast<char*>(m.c_str());
     unsigned int winner;
-    MPI_Status s;
-    
-    int status = MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD);
 
+    int status = MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    status = MPI_Recv(&winner, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &s);
-
+    status = MPI_Recv(&winner, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     status = MPI_Bcast(&winner, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Barrier(MPI_COMM_WORLD);
 
+    /* recibimos los otros mensajes que quedaron colgados */
+    for (size_t i = 1; i < np - 1; i++) {
+      status = MPI_Recv(&winner, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
     if (status!=MPI_SUCCESS){
         printf("Ups...\n");
         exit(1);
     }
-
-
-
-
     cout << "Agregado: " << key << endl;
 }
 
