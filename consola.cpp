@@ -26,17 +26,64 @@ static unsigned int np;
 // Crea un ConcurrentHashMap distribuido
 static void load(list<string> params) {
 
-    for (list<string>::iterator it=params.begin(); it != params.end(); ++it) {
-       // TODO: Implementar
+
+
+    char message[] = "load ";
+    /* Avisamos a los nodos que se preparen para la transmision */
+    if (MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD) != MPI_SUCCESS){
+      printf("Ups...\n");
+      exit(1);
     }
 
+    for (list<string>::iterator it=params.begin(); it != params.end(); ++it) {
+
+       int node;
+       string m = "CONTINUE " + *it;
+       char* file = const_cast<char*>(m.c_str());
+
+       /* Atendemos el request de algun nodo */
+       if(MPI_Recv(&node, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE)!=MPI_SUCCESS){
+         printf("Ups...\n");
+         exit(1);
+       }
+       /* Enviamos el archivo a ese nodo */
+       MPI_Send(file, strlen(file)+1, MPI_CHAR, node, 0, MPI_COMM_WORLD);
+    }
+
+    /* Avisamos a los nodos que finalizo la transmision */
+    for (size_t rank = 1; rank < np; rank++) {
+      char message[] = "FINISHED ";
+      MPI_Send(message,strlen(message)+1, MPI_INT, rank, 0, MPI_COMM_WORLD);
+    }
+
+    /* Pueden haber quedado mensajes colgados */
+    // NOTE: solucion muy cabeza, consultar el martes como se podria mejorar.
+    // Hay un bug y es que queda siempre un mensaje colgado que hace que
+    // cuando haces member *cualquier_cosa* da true 1 vez y despues funciona
+    // bien.
+    for (size_t i = 0; i < np; i++) {
+      int crap;
+      int unread_message;
+      if(MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&unread_message,MPI_STATUS_IGNORE)!=MPI_SUCCESS){
+        printf("Ups...\n");
+        exit(1);
+      }
+      if(unread_message == 1){
+        if(MPI_Recv(&crap, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE)!=MPI_SUCCESS){
+          printf("Ups...\n");
+          exit(1);
+        }
+      }
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
     cout << "La listá esta procesada" << endl;
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
 static void quit() {
     // TODO: Implementar
-    char* message = "quit ";
+    char message[] = "quit ";
     if (MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD) != MPI_SUCCESS){
       printf("Ups...\n");
       exit(1);

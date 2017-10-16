@@ -3,6 +3,7 @@
 #include "mpi.h"
 #include <unistd.h>
 #include <stdlib.h>
+#include <string>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ using namespace std;
 #define NODO_MAXIMUM "maximum"
 #define NODO_QUIT    "quit"
 #define NODO_SQUIT   "q"
-
+#define NODE_FINISHED "FINISHED"
 
 void nodo(unsigned int rank) {
     printf("Soy un nodo. Mi rank es %d \n", rank);
@@ -51,7 +52,7 @@ void nodo(unsigned int rank) {
             exit(0);
         }
         if (strncmp(cmd,NODO_LOAD,sizeof(NODO_LOAD))==0){
-            // TODO: Implementar LOAD
+            node_load(h_loal,rank);
         }
         if (strncmp(cmd,NODO_MAXIMUM,sizeof(NODO_MAXIMUM))==0){
             // TODO: Implementar maximum
@@ -65,17 +66,44 @@ void trabajarArduamente() {
 }
 
 
+
+/****************************************************************/
+
 void node_member(HashMap& hash_map, char* key){
   int la_tengo = hash_map.member(key) ? 1 : 0;
   trabajarArduamente();
   MPI_Send(&la_tengo, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
 }
 
+/****************************************************************/
+
+void node_load(HashMap& hash_map, unsigned int rank){
+  MPI_Request request;
+  char message[BUFFER_SIZE];
+
+  while(true){
+    /* Enviamos request al master */
+    trabajarArduamente();
+    MPI_Isend(&rank, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &request);
+    /* Espereamos ordenes */
+
+    if(MPI_Recv(message, BUFFER_SIZE, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE)!=MPI_SUCCESS){
+      printf("Ups...\n");
+      exit(1);
+    }
+    char *cmd = strtok(message, " ");
+    char *params = strtok(NULL, " ");
+
+    if (strncmp(cmd,NODE_FINISHED,sizeof(NODE_FINISHED))==0) break;
+    /* Cargamos el hash_map */
+    string F_name(params);
+    hash_map.load(F_name);
+  }
+  MPI_Barrier(MPI_COMM_WORLD);
+}
 
 
-
-
-
+/****************************************************************/
 
 void node_add(HashMap& hash_map, char* key, unsigned int rank){
 	unsigned int winner;

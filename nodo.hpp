@@ -17,5 +17,6 @@ void trabajarArduamente();
 
 void node_add(HashMap& hash_map, char* key, unsigned int rank);
 void node_member(HashMap& hash_map, char* key);
+void node_load(HashMap& hash_map, unsigned int rank);
 
 #endif  /* _NODO_H */
