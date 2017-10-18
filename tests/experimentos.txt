@@ -1,0 +1,5 @@
+
+
+-tirar muchos addAndInc y ver qué tipo de distribución toma (tipo normal o eso)
+-aumentar cantidad de procesos (o maquinas)
+-fijo cantidad de palabras en 1000, y vario cantidad de diferentes: 1000 palabras con 1 solo tipo (tipo 1000 holas), y asi
