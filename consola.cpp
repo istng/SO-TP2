@@ -18,7 +18,7 @@ using namespace std;
 #define CMD_MAXIMUM "maximum"
 #define CMD_QUIT    "quit"
 #define CMD_SQUIT   "q"
-
+#define FINISHED "FINISHED"
 #define AAI_TAG 1
 
 static unsigned int np;
@@ -56,23 +56,12 @@ static void load(list<string> params) {
       MPI_Send(message,strlen(message)+1, MPI_INT, rank, 0, MPI_COMM_WORLD);
     }
 
-    /* Pueden haber quedado mensajes colgados */
-    // NOTE: solucion muy cabeza, consultar el martes como se podria mejorar.
-    // Hay un bug y es que queda siempre un mensaje colgado que hace que
-    // cuando haces member *cualquier_cosa* da true 1 vez y despues funciona
-    // bien.
-    for (size_t i = 0; i < np; i++) {
+    /* recibimos los otros mensajes que quedaron colgados */
+    for (size_t i = 1; i < np; i++) {
       int crap;
-      int unread_message;
-      if(MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&unread_message,MPI_STATUS_IGNORE)!=MPI_SUCCESS){
+      if(MPI_Recv(&crap, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE)!=MPI_SUCCESS){
         printf("Ups...\n");
         exit(1);
-      }
-      if(unread_message == 1){
-        if(MPI_Recv(&crap, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE)!=MPI_SUCCESS){
-          printf("Ups...\n");
-          exit(1);
-        }
       }
     }
 
@@ -96,9 +85,45 @@ static void maximum() {
     pair<string, unsigned int> result;
 
     // TODO: Implementar
-    string str("a");
-    result = make_pair(str,10);
 
+    char message[] = "maximum ";
+    /* Avisamos a los nodos que se preparen para la transmision */
+    if (MPI_Bcast(message, strlen(message)+1, MPI_CHAR, 0, MPI_COMM_WORLD) != MPI_SUCCESS){
+      printf("Ups...\n");
+      exit(1);
+    }
+
+
+    HashMap hashMap;
+
+    for (size_t rank = 1; rank < np; rank++) {
+      /* Indico al nodo rank que estoy listo para recibir */
+      MPI_Send(&rank, 1, MPI_INT, rank, 0, MPI_COMM_WORLD);
+
+      bool finished = false;
+      while(!finished){
+        char msg[BUFFER_SIZE];
+        if(MPI_Recv(msg, BUFFER_SIZE, MPI_CHAR, rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE)!=MPI_SUCCESS){
+          printf("Ups...\n");
+          exit(1);
+        }
+
+        char* key = strtok(msg, " ");
+        char *value = strtok(NULL, " ");
+
+
+        if(strncmp(key,FINISHED,sizeof(FINISHED))!=0){
+          unsigned int count = stoi(string(value),NULL,10);
+          for (size_t i = 0; i < count; i++) {
+            hashMap.addAndInc(string(key));
+          }
+        }else{
+          finished = true;
+        }
+      }
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    result = hashMap.maximum();
     cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
 }
 

@@ -56,6 +56,7 @@ void nodo(unsigned int rank) {
         }
         if (strncmp(cmd,NODO_MAXIMUM,sizeof(NODO_MAXIMUM))==0){
             // TODO: Implementar maximum
+            node_maximum(h_loal,rank);
         }
     }
 }
@@ -121,4 +122,49 @@ void node_add(HashMap& hash_map, char* key, unsigned int rank){
   }
   MPI_Barrier(MPI_COMM_WORLD);
   if (winner == rank) hash_map.addAndInc(key);
+}
+
+/****************************************************************/
+
+void node_maximum(HashMap& hash_map, unsigned int rank){
+
+  /* Espero mi turno */
+  int crap;
+  if(MPI_Recv(&crap, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE)!=MPI_SUCCESS){
+    printf("Ups...\n");
+    exit(1);
+  }
+  /* Comienzo la transmision */
+  trabajarArduamente();
+  HashMap::iterator it = hash_map.begin();
+  unsigned int total_count = 0;
+
+  while(total_count < hash_map.size() ){
+    /* buscamos la proxima palabra a ser enviada */
+    pair<string,unsigned int> next_word = getNextWord(hash_map,it,total_count);
+    string m = next_word.first + " " + to_string(next_word.second);
+    char* message = const_cast<char*>(m.c_str());
+    MPI_Send(message, strlen(message)+1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+  }
+
+  /* Aviso a la terminal que finalizo la transmision */
+  char msg[] = "FINISHED  crap";
+  MPI_Send(msg, strlen(msg)+1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+  MPI_Barrier(MPI_COMM_WORLD);
+}
+
+
+
+
+
+
+pair<string,unsigned int> getNextWord(HashMap& h,HashMap::iterator&it,unsigned int& total_count ){
+  pair<string,unsigned int> res = make_pair(*it,0);
+  while(total_count < h.size() && !res.first.compare(*it)){
+    res.second++;
+    total_count++;
+    it++;
+  }
+
+  return res;
 }

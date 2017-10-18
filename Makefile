@@ -2,7 +2,7 @@
 
 MPIROOT = /usr
 
-CFLAGS+= -Wall -g $(INCL)
+CFLAGS+= -Wall -g -std=c++11 $(INCL)
 CC=gcc
 MPICC=  $(MPIROOT)/bin/mpic++
 INCL= -I$(MPIROOT)/include
