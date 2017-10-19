@@ -9,6 +9,10 @@
 #include "consola.hpp"
 #include "HashMap.hpp"
 #include "mpi.h"
+#include <chrono>
+
+#define now std::chrono::high_resolution_clock::now
+
 
 using namespace std;
 
@@ -82,6 +86,13 @@ static void quit() {
 
 // Esta función calcula el máximo con todos los nodos
 static void maximum() {
+
+    //inicializo las variables para medir el tiempo
+    std::chrono::high_resolution_clock::time_point t1_max;
+    std::chrono::high_resolution_clock::time_point t2_max;
+    std::chrono::duration<double> time_span_max;
+    t1_max = now();
+
     pair<string, unsigned int> result;
 
     // TODO: Implementar
@@ -125,6 +136,11 @@ static void maximum() {
     MPI_Barrier(MPI_COMM_WORLD);
     result = hashMap.maximum();
     cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
+
+    t2_max = now();
+    time_span_max = std::chrono::duration_cast<std::chrono::duration<double> >(t2_max-t1_max);
+    std::cerr << time_span_max.count() << "," << "max" << std::endl;
+
 }
 
 // Esta función busca la existencia de *key* en algún nodo
@@ -154,6 +170,12 @@ static void member(string key) {
 
 // Esta función suma uno a *key* en algún nodo
 static void addAndInc(string key) {
+    //inicializo las variables para medir el tiempo
+    std::chrono::high_resolution_clock::time_point t1_aai;
+    std::chrono::high_resolution_clock::time_point t2_aai;
+    std::chrono::duration<double> time_span_aai;
+
+    t1_aai = now();
 
     string m = "addAndInc " + key;
     char* message = const_cast<char*>(m.c_str());
@@ -176,6 +198,11 @@ static void addAndInc(string key) {
         exit(1);
     }
     cout << "Agregado: " << key << endl;
+
+    t2_aai = now();
+    time_span_aai = std::chrono::duration_cast<std::chrono::duration<double> >(t2_aai-t1_aai);
+
+    std::cerr << time_span_aai.count() << "," << winner << std::endl;
 }
 
 
@@ -186,7 +213,6 @@ Si devuelve false, significa que debe seguir recibiendo un nuevo comando
 */
 
 static bool procesar_comandos() {
-
     char buffer[BUFFER_SIZE];
     size_t buffer_length;
     char *res, *first_param, *second_param;
@@ -217,7 +243,20 @@ static bool procesar_comandos() {
     }
 
     if (strncmp(first_param, CMD_MAXIMUM, sizeof(CMD_MAXIMUM))==0) {
+        //inicializo las variables para medir el tiempo
+        std::chrono::high_resolution_clock::time_point t1_max;
+        std::chrono::high_resolution_clock::time_point t2_max;
+        std::chrono::duration<double> time_span_max;
+
+
+        t1_max = now();
         maximum();
+        t2_max = now();
+
+        time_span_max = std::chrono::duration_cast<std::chrono::duration<double> >(t2_max-t1_max);
+
+        std::cerr << "max: " << time_span_max.count() << std::endl;
+
         return false;
     }
 
@@ -242,6 +281,7 @@ static bool procesar_comandos() {
         else {
             printf("Falta un parámetro\n");
         }
+
         return false;
     }
 
@@ -270,6 +310,8 @@ void consola(unsigned int np_param) {
     printf("  "CMD_MEMBER" <string>\n");
     printf("  "CMD_MAXIMUM"\n");
     printf("  "CMD_SQUIT"|"CMD_QUIT"\n");
+
+    std::cerr << "tiempo,rank" << std::endl;
 
     bool fin = false;
     while (!fin) {

@@ -107,7 +107,8 @@ void node_load(HashMap& hash_map, unsigned int rank){
 /****************************************************************/
 
 void node_add(HashMap& hash_map, char* key, unsigned int rank){
-	unsigned int winner;
+
+  unsigned int winner;
 	MPI_Request request;
   /* Esperamos a los nodos */
   MPI_Barrier(MPI_COMM_WORLD);
