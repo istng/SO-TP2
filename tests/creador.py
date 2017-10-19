@@ -28,10 +28,11 @@ def normalizador(l, res):
 
 
 #imprime un array de palabras como necesita el input del programa
-def impresorAddAndInc(res):
+def impresor(res):
 	for i in range(0,len(res)):
 		print('addAndInc ' + str(res[i]))
-	print('')
+	print('maximum')
+	print('q')
 
 
 
@@ -39,4 +40,4 @@ def impresorAddAndInc(res):
 if __name__ == '__main__':
 	armador()
 	normalizador()
-	impresorAddAndInc()
+	impresor()

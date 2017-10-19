@@ -1,33 +1,19 @@
 #!/bin/bash
 
-
-for i in {1..50..1}
-	do
-		echo variando exp1 en $i
-		mpiexec -np 5 ./dist_hashmap < ./tests/exp1/corpus1 #> "./tests/exp1/resultados/$i_1.csv"
-		mpiexec -np 5 ./dist_hashmap < ./tests/exp1/corpus2 #> "./tests/exp1/resultados/$i_2.csv"
-		mpiexec -np 5 ./dist_hashmap < ./tests/exp1/corpus3 #> "./tests/exp1/resultados/$i_3.csv"
-		mpiexec -np 5 ./dist_hashmap < ./tests/exp1/corpus4 #> "./tests/exp1/resultados/$i_4.csv"
-		mpiexec -np 5 ./dist_hashmap < ./tests/exp1/corpus5 #> "./tests/exp1/resultados/$i_5.csv"
-done
+#Calculo de distribución (nos importa cada palabra y cada rank, por eso el mismo corpus y nada de avg)
+mpiexec -np 8 ./dist_hashmap < ./tests/exps/corpus1000 2> "./resultados/distr/1000.csv"
+#mpiexec -np 5 ./dist_hashmap < ./tests/exps/corpus1 2> "./resultados/distr/2.csv"
+#mpiexec -np 5 ./dist_hashmap < ./tests/exps/corpus1 2> "./resultados/distr/3.csv"
+#mpiexec -np 5 ./dist_hashmap < ./tests/exps/corpus1 2> "./resultados/distr/4.csv"
+#mpiexec -np 5 ./dist_hashmap < ./tests/exps/corpus1 2> "./resultados/distr/5.csv"
 
 
-for i in {1..5..1}
-	do
-		for j in {1..50..1}
-			do
-				echo variando exp2 en i: $i j: $j
-				mpiexec -np $i ./dist_hashmap < ./tests/exp1/corpus1 #> "./tests/exp2/resultados/$i_$j_1.csv"
-				mpiexec -np $i ./dist_hashmap < ./tests/exp1/corpus2 #> "./tests/exp2/resultados/$i_$j_2.csv"
-				mpiexec -np $i ./dist_hashmap < ./tests/exp1/corpus3 #> "./tests/exp2/resultados/$i_$j_3.csv"
-				mpiexec -np $i ./dist_hashmap < ./tests/exp1/corpus4 #> "./tests/exp2/resultados/$i_$j_4.csv"
-				mpiexec -np $i ./dist_hashmap < ./tests/exp1/corpus5 #> "./tests/exp2/resultados/$i_$j_5.csv"
-		done
-done
-
-
-for i in {1..50..1}
-	do
-		echo variando exp3 en $i
-		mpiexec -np 5 ./dist_hashmap < ./tests/exp3/$i #> ./tests/exp3/resultados/$i.csv
-done
+#Calculo de tiempos con variación de procesos (no nos interesa el rank, nos interesa el tiempo, pero de addAndInc en general, no por palabra, por eso sin avg)
+#for i in {6..8..1}
+#	do
+#		mpiexec -np $i ./dist_hashmap < ./tests/exps/corpus1 2> "./resultados/var/$i/rc1.csv"
+#		mpiexec -np $i ./dist_hashmap < ./tests/exps/corpus2 2> "./resultados/var/$i/rc2.csv"
+#		mpiexec -np $i ./dist_hashmap < ./tests/exps/corpus3 2> "./resultados/var/$i/rc3.csv"
+#		mpiexec -np $i ./dist_hashmap < ./tests/exps/corpus4 2> "./resultados/var/$i/rc4.csv"
+#		mpiexec -np $i ./dist_hashmap < ./tests/exps/corpus5 2> "./resultados/var/$i/rc5.csv"
+#done

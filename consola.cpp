@@ -243,20 +243,7 @@ static bool procesar_comandos() {
     }
 
     if (strncmp(first_param, CMD_MAXIMUM, sizeof(CMD_MAXIMUM))==0) {
-        //inicializo las variables para medir el tiempo
-        std::chrono::high_resolution_clock::time_point t1_max;
-        std::chrono::high_resolution_clock::time_point t2_max;
-        std::chrono::duration<double> time_span_max;
-
-
-        t1_max = now();
         maximum();
-        t2_max = now();
-
-        time_span_max = std::chrono::duration_cast<std::chrono::duration<double> >(t2_max-t1_max);
-
-        std::cerr << "max: " << time_span_max.count() << std::endl;
-
         return false;
     }
 
