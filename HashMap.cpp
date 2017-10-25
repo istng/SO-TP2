@@ -100,7 +100,7 @@ void HashMap::load(const string &filename) {
     string read_word;
 
     if (!file.is_open()) {
-        cerr << "Error al abrir el archivo '" << filename << "'" << endl;
+        //std::cerr << "Error al abrir el archivo '" << filename << "'" << endl;
         return;
     }
 
@@ -108,7 +108,7 @@ void HashMap::load(const string &filename) {
         addAndInc(read_word);
     }
     if (!file.eof()) {
-        cerr << "Error al abrir el archivo '" << filename << "'" << endl;
+        //std::cerr << "Error al abrir el archivo '" << filename << "'" << endl;
     }
     file.close();
 }
@@ -121,7 +121,9 @@ void HashMap::printAll() const {
             it != bucket.end();
             ++it)
         {
-            cout << "<" << (*it).first << "," << (*it).second << ">" << endl;
+            const char* c = ((*it).first).c_str();
+            printf("%s %s %s %u %s\n", "<", c, ",", (*it).second, ">");
+            //cout << "<" << (*it).first << "," << (*it).second << ">" << endl;
         }
     }
 }
@@ -130,7 +132,7 @@ int HashMap::hash(const string &key) {
     // Devuelvo el índice correspondiente a la primera letra de la palabra
 
     if (key.size() == 0 || is_invalid_char(key[0])) {
-        cerr << "Clave inválida" << endl;
+        //std::cerr << "Clave inválida" << endl;
         return -1;
     }
 

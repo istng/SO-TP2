@@ -70,7 +70,8 @@ static void load(list<string> params) {
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
-    cout << "La listá esta procesada" << endl;
+    printf("%s\n", "La listá esta procesada");
+    //cout << "La listá esta procesada" << endl;
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
@@ -81,7 +82,8 @@ static void quit() {
       printf("Ups...\n");
       exit(1);
     }
-    cout << "Todos los nodos han terminado." << endl;
+    printf("%s\n", "Todos los nodos han terminado.");
+    //cout << "Todos los nodos han terminado." << endl;
 }
 
 // Esta función calcula el máximo con todos los nodos
@@ -135,11 +137,13 @@ static void maximum() {
     }
     MPI_Barrier(MPI_COMM_WORLD);
     result = hashMap.maximum();
-    cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
+    const char* c = (result.first).c_str();
+    printf("%s%s%s %u%s\n", "El máximo es <", c, ",", result.second, ">");
+    //cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
 
     t2_max = now();
     time_span_max = std::chrono::duration_cast<std::chrono::duration<double> >(t2_max-t1_max);
-    std::cerr << time_span_max.count() << "," << "max" << std::endl;
+    //std::cerr << time_span_max.count() << "," << "max" << std::endl;
 
 }
 
@@ -164,7 +168,9 @@ static void member(string key) {
     }
     if(node_response==1) esta = true;
   }
-    cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
+  	const char* c = key.c_str();
+  	printf("%s%s%s %s\n", "El string <", c, (esta ? ">" : "> no"), "está");
+    //cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
 }
 
 
@@ -197,12 +203,14 @@ static void addAndInc(string key) {
         printf("Ups...\n");
         exit(1);
     }
-    cout << "Agregado: " << key << endl;
+    const char* c = key.c_str();
+    printf("%s %s\n", "Agregado:", c);
+    //cout << "Agregado: " << key << endl;
 
     t2_aai = now();
     time_span_aai = std::chrono::duration_cast<std::chrono::duration<double> >(t2_aai-t1_aai);
 
-    std::cerr << time_span_aai.count() << "," << winner << std::endl;
+    //std::cerr << time_span_aai.count() << "," << winner << std::endl;
 }
 
 
@@ -298,7 +306,7 @@ void consola(unsigned int np_param) {
     printf("  "CMD_MAXIMUM"\n");
     printf("  "CMD_SQUIT"|"CMD_QUIT"\n");
 
-    std::cerr << "tiempo,rank" << std::endl;
+    //std::cerr << "tiempo,rank" << std::endl;
 
     bool fin = false;
     while (!fin) {
