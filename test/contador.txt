@@ -1,0 +1,16 @@
+El corpus mostrado contiene 100 palabras.
+Se propone la ejecución:
+mpiexec -np 5 ./dist_hashmap < corpus
+
+El agregado de palabras no nos dió ningún problema para ninguno de nuestros tests, ni experimentación.
+Así mismo el resto de funciones (utilizadas también a la hora de probar otros aspectos del código), 
+como lo son member o load.
+
+La función maximum creemos que es un buen test para probar en general el código, ya que nuestra 
+implementación debe recorrer todos los hash map de cada nodo, tomar cada palabra y su cantidad 
+de apariciones, y luego tomar un maximum dentro de este nuevo has map (como explicamos en el 
+informe). En este caso, comprobamos fuera del código que la palabra con mas apariciones es 
+"accesses", que está en el corpus tres veces.
+
+El restulado al correlo fue:
+> El máximo es <accesses, 3>
